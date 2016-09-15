@@ -278,7 +278,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                 $json = json_decode($res->getBody(), true);
 
                 if (!array_key_exists($title, $json)) {
-                    WP_CLI::error(sprintf('Unexepcted response from wpvulndb for plugin %s', $title));
+                    WP_CLI::error(sprintf('Unexpected response from wpvulndb for plugin %s', $title));
                 }
 
                 $vulnerabilities = $json[$title]['vulnerabilities'];
@@ -301,7 +301,8 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                             WP_CLI::line('-----------------------------');
                             WP_CLI::line(sprintf('Plugin: %s', $title));
                             WP_CLI::line(sprintf('Version: %s', $version));
-                            WP_CLI::line('Vulnerable: yes');
+                            WP_CLI::line(sprintf('Vulnerability: %s', $vulnerability['title']));
+
 
                             if (array_key_exists('cve', $vulnerability['references'])) {
                                 $cves = $vulnerability['references']['cve'];
@@ -397,7 +398,8 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                             WP_CLI::line('-----------------------------');
                             WP_CLI::line(sprintf('Theme: %s', $title));
                             WP_CLI::line(sprintf('Version: %s', $version));
-                            WP_CLI::line('Vulnerable: yes');
+                            WP_CLI::line(sprintf('Vulnerability: %s', $vulnerability['title']));
+
                             if (array_key_exists('cve', $vulnerability['references'])) {
                                 $cves = $vulnerability['references']['cve'];
                                 WP_CLI::line(sprintf('CVE\'s: %s', implode(', ', $cves)));
@@ -438,13 +440,17 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             $toCheckParts = explode('.', trim($versionToCheck));
             $minimumParts = explode('.', trim($minimumVersion));
 
-            foreach ($toCheckParts as $index => $version) {
+            // Be sure to fill in zeros, e.g. we have 4.5 but fixed version is 4.5.3, so we modify 4.5 to 4.5.0
+            if (count($minimumParts) > count($toCheckParts)) {
+                $toCheckParts = array_pad($toCheckParts, count($minimumParts), 0);
+            }
 
-                if ($index > (count($minimumParts) - 1)) {
-                    throw new \UnexpectedValueException(
-                        sprintf('Cant compare %s to %s', $versionToCheck, $minimumVersion)
-                    );
-                }
+            // The other way around as well, in case we have 1.2.3 but fixed in is 1.2, we modify 1.2 to 1.2.0
+            if (count($toCheckParts) > count($minimumParts)) {
+                $minimumParts = array_pad($minimumParts, count($toCheckParts), 0);
+            }
+
+            foreach ($toCheckParts as $index => $version) {
 
                 if ($version < $minimumParts[$index]) {
                     return true;
