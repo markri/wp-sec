@@ -19,7 +19,7 @@ services:
         MYSQL_PASSWORD: password
         MYSQL_DATABASE: database
     volumes:
-      - ./docker/mariadb/resources/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/images/mariadb/resources/my.cnf:/etc/mysql/conf.d/my.cnf
       - ./docker/data/mariadb:/var/lib/mysql
       - ./docker/log/mysql:/var/log/mysql
 

@@ -11,7 +11,7 @@ RUN apt-get update && \
         libssl-dev && \
     docker-php-ext-install -j$(nproc) bcmath mcrypt gd curl pdo pdo_mysql soap intl mbstring zip mysqli
 
-RUN apt-get install -y less mysql-client
+RUN apt-get install -y less mysql-client git
 
 RUN useradd --create-home --shell /bin/bash wp
 USER wp
