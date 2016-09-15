@@ -1,25 +1,21 @@
 <?php
 
 /**
- * Checks for vulnerabilities at wpvulndb.com
+ * Checks for vulnerabilities at wpvulndb.com.
  *
  * @author markri http://github.com/markri
  * @license MIT
  */
-
-require( __DIR__ . '/vendor/autoload.php' );
-
+require __DIR__.'/vendor/autoload.php';
 
 use GuzzleHttp\Exception\ClientException;
 
-
-if ( ! class_exists( 'WP_CLI' ) ) {
+if (!class_exists('WP_CLI')) {
     // Whoops, something is wrong
-	return;
+    return;
 }
 
-if ( ! class_exists( 'WpSecCheck' ) ) {
-
+if (!class_exists('WpSecCheck')) {
     class WpSecCheck
     {
         private $outputType = true;
@@ -61,7 +57,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
 
             $this->outputType = $assoc_args['output'];
-
 
             // Validate wordpress installation
             $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
@@ -124,7 +119,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                     $output = [
                         'core' => $this->coreVulnerabilityCount,
                         'plugins' => $this->pluginVulnerabilityCount,
-                        'themes' => $this->themeVulnerabilityCount
+                        'themes' => $this->themeVulnerabilityCount,
                     ];
 
                     WP_CLI::line(json_encode($output));
@@ -133,9 +128,8 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
         }
 
-
         /**
-         * Checks core version at wpvulndb
+         * Checks core version at wpvulndb.
          */
         private function checkCoreVulnerability()
         {
@@ -175,13 +169,11 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                 WP_CLI::error(sprintf('Version %s not found on wpvulndb', $coreVersion));
             }
 
-
             // Process found vulnerabilities
             $vulnerabilities = $json[$coreVersion]['vulnerabilities'];
             $this->coreVulnerabilityCount = count($vulnerabilities);
 
             if (empty($vulnerabilities)) {
-
                 switch ($this->outputType) {
                     case self::OUTPUT_JSON:
                         break;
@@ -208,7 +200,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
 
             foreach ($vulnerabilities as $vulnerability) {
-
                 switch ($this->outputType) {
                     case self::OUTPUT_JSON:
                         break;
@@ -236,9 +227,8 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             return true;
         }
 
-
         /**
-         * Check plugins at wpvulndb
+         * Check plugins at wpvulndb.
          */
         private function checkPluginVulnerabilities()
         {
@@ -263,7 +253,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
 
             foreach ($plugins as $plugin) {
-
                 $title = $plugin['name'];
                 $version = $plugin['version'];
 
@@ -290,7 +279,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                         continue;
                     }
 
-                    $this->pluginVulnerabilityCount++;
+                    ++$this->pluginVulnerabilityCount;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
@@ -302,7 +291,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                             WP_CLI::line(sprintf('Plugin: %s', $title));
                             WP_CLI::line(sprintf('Version: %s', $version));
                             WP_CLI::line(sprintf('Vulnerability: %s', $vulnerability['title']));
-
 
                             if (array_key_exists('cve', $vulnerability['references'])) {
                                 $cves = $vulnerability['references']['cve'];
@@ -321,7 +309,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                 }
             }
 
-
             if ($this->pluginVulnerabilityCount === 0) {
                 switch ($this->outputType) {
                     case self::OUTPUT_JSON:
@@ -334,7 +321,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                 }
             }
         }
-
 
         private function checkThemeVulnerabilities()
         {
@@ -360,7 +346,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
 
             foreach ($themes as $theme) {
-
                 $title = $theme['name'];
                 $version = $theme['version'];
 
@@ -387,7 +372,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                         continue;
                     }
 
-                    $this->themeVulnerabilityCount++;
+                    ++$this->themeVulnerabilityCount;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
@@ -416,7 +401,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                 }
             }
 
-
             if ($this->themeVulnerabilityCount === 0) {
                 switch ($this->outputType) {
                     case self::OUTPUT_JSON:
@@ -433,6 +417,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
         /**
          * @param $versionToCheck
          * @param $minimumVersion
+         *
          * @return bool
          */
         private function isVersionLessThan($versionToCheck, $minimumVersion)
@@ -451,7 +436,6 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
             }
 
             foreach ($toCheckParts as $index => $version) {
-
                 if ($version < $minimumParts[$index]) {
                     return true;
                 } elseif ($version > $minimumParts[$index]) {
@@ -464,9 +448,7 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
     }
 }
 
-
-if ( ! class_exists( 'WpSecVersion' ) ) {
-
+if (!class_exists('WpSecVersion')) {
     class WpSecVersion
     {
         public function __invoke()
@@ -477,28 +459,28 @@ if ( ! class_exists( 'WpSecVersion' ) ) {
 }
 
 WP_CLI::add_command(
-	'wp-sec check',
+    'wp-sec check',
     'WpSecCheck',
     array(
-		'shortdesc' => 'Checks for vulnerabilities at wpvulndb.com',
-		'synopsis' => array(
-			array(
-				'type'     => 'assoc',
-				'name'     => 'type',
-				'optional' => true,
-				'default'  => 'all',
-				'options'  => array( 'core', 'themes', 'plugins', 'all'),
-			),
+        'shortdesc' => 'Checks for vulnerabilities at wpvulndb.com',
+        'synopsis' => array(
             array(
-                'type'     => 'assoc',
-                'name'     => 'output',
+                'type' => 'assoc',
+                'name' => 'type',
                 'optional' => true,
-                'default'  => 'user',
-                'options'  => array( 'json', 'nagios', 'user'),
+                'default' => 'all',
+                'options' => array('core', 'themes', 'plugins', 'all'),
             ),
-		),
+            array(
+                'type' => 'assoc',
+                'name' => 'output',
+                'optional' => true,
+                'default' => 'user',
+                'options' => array('json', 'nagios', 'user'),
+            ),
+        ),
         'when' => 'before_wp_load',
-	)
+    )
 );
 
 WP_CLI::add_command(
