@@ -1,5 +1,10 @@
 .DS_Store
-composer.lock
 wp-cli.local.yml
-node_modules/
+composer.lock
+composer.phar
 vendor/
+.wp-cli
+bin/wp
+.bash_history
+.idea
+testsite/
