@@ -3,8 +3,9 @@ wp-cli.local.yml
 composer.lock
 composer.phar
 vendor/
-.wp-cli
+.wp-cli/
 bin/wp
 .bash_history
-.idea
+.idea/
 testsite/
+.composer/

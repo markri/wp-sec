@@ -105,12 +105,12 @@ if ( ! class_exists( 'WpSecCheck' ) ) {
                     break;
                 case self::OUTPUT_NAGIOS:
                     if ($this->coreVulnerabilityCount == 0 && $this->pluginVulnerabilityCount == 0 && $this->themeVulnerabilityCount == 0) {
-                        WP_CLI::line('No vulnerabilities found');
+                        WP_CLI::line('[OK] no vulnerabilities found');
                         exit(0);
                     } else {
                         WP_CLI::line(
                             sprintf(
-                                '%s core, %s plugin and %s theme vulnerabilities found',
+                                '[CRITICAL] %s core, %s plugin and %s theme vulnerabilities found',
                                 $this->coreVulnerabilityCount,
                                 $this->pluginVulnerabilityCount,
                                 $this->themeVulnerabilityCount

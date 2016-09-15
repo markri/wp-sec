@@ -165,6 +165,16 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 	 * @param array $parameters context parameters (set them up through behat.yml)
 	 */
 	public function __construct( array $parameters ) {
+
+		if (getenv("TRAVIS") === false) {
+			self::$db_settings = array(
+				'dbname' => 'wp_cli_test',
+				'dbuser' => 'root',
+				'dbpass' => 'password',
+				'dbhost' => 'wpsec-mysql',
+				);
+		}
+
 		$this->drop_db();
 		$this->set_cache_dir();
 		$this->variables['CORE_CONFIG_SETTINGS'] = Utils\assoc_args_to_str( self::$db_settings );
