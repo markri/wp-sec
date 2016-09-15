@@ -68,7 +68,7 @@ writing tutorials, giving a demo at your local meetup, helping other users with 
 ## Development
 
 To setup a development environment for code contributions, follow instructions below. Execution of the extension is done
-within a dockerized environment. Editing can still be done outside of docker as the current directory is mounted into 
+within a dockerized environment (only tested under Linux). Editing can still be done outside of docker as the current directory is mounted into
 the docker environment.
 
 Place wp-cli binary in the bin folder. According to current documentation from WP-CLI you would want to do something 
@@ -87,16 +87,17 @@ Enter your dev environment and create a fresh wordpress installation to test aga
 
        docker exec -ti wpsec-phpcli /bin/bash
        
-       # Composer install
-       
-       mkdir testsite
+[Install composer](https://getcomposer.org/download/) and run
+
+       php composer.phar install
+       mkdir testsite && cd testsite
        wp core download
        wp core config --dbname=database --dbuser=user --dbpass=password --dbhost=wpsec-mysql
        wp core install --url=http://localhost --title=testsite --admin_user=admin --admin_password=admin --admin_email=mail@mail.com --skip-email
        
 Running
 
-       wp wp-sec version
+       wp wp-sec check
        
 Running testsuite
        

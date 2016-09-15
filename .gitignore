@@ -9,3 +9,4 @@ bin/wp
 .idea/
 testsite/
 .composer/
+docker/data
