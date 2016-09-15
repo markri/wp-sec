@@ -1,6 +1,6 @@
 {
     "name": "markri/wp-sec",
-    "description": "Checks for Wordpress CVE's at wpvulndb.com",
+    "description": "Checks Wordpress installation for CVE security issues at wpvulndb.com",
     "homepage": "https://github.com/markri/wp-sec",
     "license": "MIT",
     "authors": [],

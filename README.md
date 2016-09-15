@@ -8,22 +8,54 @@ Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contr
 
 ## What is wp-sec?
 
-Wp-sec is an exentsion for wp-cli which checks for Wordpress CVE's at wpvulndb.com. Installed versions of wp core, 
-plugins and themes can be checked or monitored, so you know when to update your Wordpress installation.
+Wp-sec is an exentsion for wp-cli which checks for Wordpress CVE security issues at wpvulndb.com. All installed versions
+of core, plugins and themes can be checked or monitored, so you know when to update your Wordpress installation.
 
 ## Using
 
-After installation run:
+Following synopsis should be enough to get you started
 
-    wp wp-sec check
+    NAME
+
+      wp wp-sec
+
+    DESCRIPTION
+
+      Check for CVE security issues at wpvulndb.com
+
+    SYNOPSIS
+
+      wp wp-sec <command>
+
+    SUBCOMMANDS
+
+      check      Checks for core, plugins and themes
+      version    Returns current version
+
+
+    CHECK PARAMETERS
+
+      --type=[core|plugins|themes|all]
+          Check for a specific part, or use all to check all parts
+          Default: all
+
+      --output=[user|nagios|json]
+          Controls the output
+          Default: user
+
+    GLOBAL PARAMETERS
+
+      All global wp cli parameters are inherited
+
+
 
 ## Installing
 
-Installing this package requires WP-CLI v0.23.0 or greater. Update to the latest stable release with `wp cli update`.
+Installing this package requires WP-CLI v0.23.0 or greater. Install fresh wp-cli as instructed [here](http://wp-cli.org/#installing)
+Or update to the latest stable release with `wp cli update`.
 
 Once you've done so, you can install this package with `wp package install markri/wp-sec`.
 
-@todo as plugin?
 
 ## Contributing
 
