@@ -8,8 +8,8 @@ Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contr
 
 ## What is wp-sec?
 
-Wp-sec is an exentsion for wp-cli which checks for Wordpress CVE security issues at wpvulndb.com. All installed versions
-of core, plugins and themes can be checked or monitored, so you know when to update your Wordpress installation.
+Wp-sec is an extension for wp-cli which checks for Wordpress CVE security issues at wpvulndb.com. All installed versions
+of core, plugins and themes can be checked and monitored, so you know when to update your Wordpress installation.
 
 ## Using
 
