@@ -9,6 +9,7 @@
         "files": [ "command.php" ]
     },
     "require": {
+        "guzzlehttp/promises": "^1.0",
         "guzzlehttp/guzzle": "~6.0"
     },
     "require-dev": {
