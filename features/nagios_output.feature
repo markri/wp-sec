@@ -6,5 +6,5 @@ Feature: Test that Nagios output is generated
     When I run `wp wp-sec check --output=nagios`
     Then STDOUT should contain:
       """
-      [OK] no vulnerabilities found
+      OK - no vulnerabilities found
       """
