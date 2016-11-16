@@ -6,5 +6,5 @@ Feature: Test that JSON output is generated
     When I run `wp wp-sec check --output=json`
     Then STDOUT should contain:
       """
-      {"core":0,"plugins":0,"themes":0}
+      {"core":{"count":0,"details":[]},"plugins":{"count":0,"details":[]},"themes":{"count":0,"details":[]}}
       """

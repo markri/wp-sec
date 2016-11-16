@@ -25,8 +25,11 @@ if (!class_exists('WpSecCheck')) {
         private $outputType = true;
 
         private $coreVulnerabilityCount = 0;
+        private $coreVulnerabilities = array();
         private $pluginVulnerabilityCount = 0;
+        private $pluginVulnerabilities = array();
         private $themeVulnerabilityCount = 0;
+        private $themeVulnerabilities = array();
 
         const OUTPUT_USER = 'user';
         const OUTPUT_JSON = 'json';
@@ -121,9 +124,18 @@ if (!class_exists('WpSecCheck')) {
                 case self::OUTPUT_JSON:
 
                     $output = [
-                        'core' => $this->coreVulnerabilityCount,
-                        'plugins' => $this->pluginVulnerabilityCount,
-                        'themes' => $this->themeVulnerabilityCount,
+                        'core' => [
+                          'count'   => $this->coreVulnerabilityCount,
+                          'details' => $this->coreVulnerabilities,
+                        ],
+                        'plugins' => [
+                          'count'   => $this->pluginVulnerabilityCount,
+                          'details' => $this->pluginVulnerabilities,
+                        ],
+                        'themes' => [
+                          'count'   => $this->themeVulnerabilityCount,
+                          'details' => $this->themeVulnerabilities,
+                         ],
                     ];
 
                     WP_CLI::line(json_encode($output));
@@ -176,6 +188,7 @@ if (!class_exists('WpSecCheck')) {
             // Process found vulnerabilities
             $vulnerabilities = $json[$coreVersion]['vulnerabilities'];
             $this->coreVulnerabilityCount = count($vulnerabilities);
+            $this->coreVulnerabilities = $vulnerabilities;
 
             if (empty($vulnerabilities)) {
                 switch ($this->outputType) {
@@ -284,6 +297,7 @@ if (!class_exists('WpSecCheck')) {
                     }
 
                     ++$this->pluginVulnerabilityCount;
+                    $this->pluginVulnerabilities[$title][] = $vulnerability;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
@@ -377,6 +391,7 @@ if (!class_exists('WpSecCheck')) {
                     }
 
                     ++$this->themeVulnerabilityCount;
+                    $this->themeVulnerabilities[$title][] = $vulnerability;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
