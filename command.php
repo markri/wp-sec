@@ -124,9 +124,18 @@ if (!class_exists('WpSecCheck')) {
                 case self::OUTPUT_JSON:
 
                     $output = [
-                        'core' => $this->coreVulnerabilities,
-                        'plugins' => $this->pluginVulnerabilities,
-                        'themes' => $this->themeVulnerabilities,
+                        'core' => [
+                          'count'   => $this->coreVulnerabilityCount,
+                          'details' => $this->coreVulnerabilities,
+                        ],
+                        'plugins' => [
+                          'count'   => $this->pluginVulnerabilityCount,
+                          'details' => $this->pluginVulnerabilities,
+                        ],
+                        'themes' => [
+                          'count'   => $this->themeVulnerabilityCount,
+                          'details' => $this->themeVulnerabilities,
+                         ],
                     ];
 
                     WP_CLI::line(json_encode($output));
