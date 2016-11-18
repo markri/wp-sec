@@ -296,6 +296,13 @@ if (!class_exists('WpSecCheck')) {
                 }
 
                 $vulnerabilities = $json[$title]['vulnerabilities'];
+                $pluginVulnerabilities = array(
+                    'title'   => $title,
+                    'version' => $version,
+                    'status'  => $plugin['status'],
+                    'details' => array(),
+                    'count'   => 0
+                );
 
                 foreach ($vulnerabilities as $vulnerability) {
                     $safeVersion = $vulnerability['fixed_in'];
@@ -305,7 +312,8 @@ if (!class_exists('WpSecCheck')) {
                     }
 
                     ++$this->pluginVulnerabilityCount;
-                    $this->pluginVulnerabilities[$title][] = $vulnerability;
+                    ++$pluginVulnerabilities['count'];
+                    $pluginVulnerabilities['details'][] = $vulnerability;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
@@ -333,6 +341,11 @@ if (!class_exists('WpSecCheck')) {
                             break;
                     }
                 }
+
+                if ($pluginVulnerabilities['count'] > 0) {
+                    $this->pluginVulnerabilities[] = $pluginVulnerabilities;
+                }
+
             }
 
             if ($this->pluginVulnerabilityCount === 0) {
@@ -390,6 +403,13 @@ if (!class_exists('WpSecCheck')) {
                 }
 
                 $vulnerabilities = $json[$title]['vulnerabilities'];
+                $themeVulnerabilities = array(
+                    'title'   => $title,
+                    'version' => $version,
+                    'status'  => $theme['status'],
+                    'details' => array(),
+                    'count'   => 0
+                );
 
                 foreach ($vulnerabilities as $vulnerability) {
                     $safeVersion = $vulnerability['fixed_in'];
@@ -399,7 +419,8 @@ if (!class_exists('WpSecCheck')) {
                     }
 
                     ++$this->themeVulnerabilityCount;
-                    $this->themeVulnerabilities[$title][] = $vulnerability;
+                    ++$themeVulnerabilities['count'];
+                    $themeVulnerabilities['details'][] = $vulnerability;
 
                     switch ($this->outputType) {
                         case self::OUTPUT_JSON:
@@ -426,6 +447,11 @@ if (!class_exists('WpSecCheck')) {
                             break;
                     }
                 }
+
+                if ($themeVulnerabilities['count'] > 0) {
+                    $this->themeVulnerabilities[] = $themeVulnerabilities;
+                }
+
             }
 
             if ($this->themeVulnerabilityCount === 0) {
