@@ -97,6 +97,18 @@ $steps->Then( '/^STDOUT should be a JSON array containing:$/',
 		}
 });
 
+$steps->Then( '/^STDOUT should be a JSON object with the property:$/',
+	function ( $world, PyStringNode $expected ) {
+		$output = $world->result->stdout;
+		$expected = $world->replace_variables( (string) $expected );
+
+		$actualValues = json_decode( $output );
+
+		if ( !property_exists($actualValues, $expected) ) {
+			throw new \Exception( print_r(array('act' => $actualValues, 'exp' => $expected, 'res' => $world->result, 'b' => property_exists($output, 'plugins')), true) );
+		}
+});
+
 $steps->Then( '/^STDOUT should be CSV containing:$/',
 	function ( $world, TableNode $expected ) {
 		$output = $world->result->stdout;

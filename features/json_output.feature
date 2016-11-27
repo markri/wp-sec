@@ -4,7 +4,16 @@ Feature: Test that JSON output is generated
     Given a WP install
 
     When I run `wp wp-sec check --output=json`
-    Then STDOUT should contain:
+
+    Then STDOUT should be a JSON object with the property: 
       """
-      {"core":{"count":0,"details":[]},"plugins":{"count":0,"details":[]},"themes":{"count":0,"details":[]}}
+      core
+      """
+    And STDOUT should be a JSON object with the property: 
+      """
+      plugins
+      """
+    And STDOUT should be a JSON object with the property: 
+      """
+      themes
       """
