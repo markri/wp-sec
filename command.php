@@ -23,6 +23,7 @@ if (!class_exists('WpSecCheck')) {
     class WpSecCheck
     {
         private $outputType = true;
+        private $cached = FALSE;
 
         private $coreVulnerabilityCount = 0;
         private $coreVulnerabilities = array();
@@ -64,6 +65,8 @@ if (!class_exists('WpSecCheck')) {
             }
 
             $this->outputType = $assoc_args['output'];
+
+            $this->cached = isset($assoc_args['cached']);
 
             // Validate wordpress installation
             $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
@@ -178,16 +181,26 @@ if (!class_exists('WpSecCheck')) {
             // Connect to wpvulndb
             $parameter = intval(str_replace('.', '', $coreVersion));
 
-            $client = new GuzzleHttp\Client();
-            $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
+            $cache = WP_CLI::get_cache();
+            $cache_key = "wp-sec/core.json";
+            $cache_file = $cache->has( $cache_key );
 
-            try {
-                $res = $client->request('GET', $url);
-            } catch (ClientException $e) {
-                WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s', $url));
+            if ($cache_file && $this->cached) {
+                $json = json_decode($cache->read($cache_key), true);
             }
+            else {
 
-            $json = json_decode($res->getBody(), true);
+                $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
+                $req = WP_CLI\Utils\http_request('GET', $url);
+
+                if ( 20 != substr( $req->status_code, 0, 2 ) ) {
+                    WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
+                }
+
+                $cache->write($cache_key, $req->body);
+                $json = json_decode($req->body, true);
+
+            }
 
             if (!array_key_exists($coreVersion, $json)) {
                 WP_CLI::error(sprintf('Version %s not found on wpvulndb', $coreVersion));
@@ -260,7 +273,6 @@ if (!class_exists('WpSecCheck')) {
             $this->pluginVulnerabilityCount = 0;
             $output = WP_CLI::launch_self('plugin list', array(), array('format' => 'json'), false, true);
             $plugins = json_decode($output->stdout, true);
-            $client = new GuzzleHttp\Client();
 
             switch ($this->outputType) {
                 case self::OUTPUT_JSON:
@@ -281,15 +293,26 @@ if (!class_exists('WpSecCheck')) {
                 $title = $plugin['name'];
                 $version = $plugin['version'];
 
-                $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
+                $cache = WP_CLI::get_cache();
+                $cache_key = "wp-sec/plugin-$title.json";
+                $cache_file = $cache->has( $cache_key );
 
-                try {
-                    $res = $client->request('GET', $url);
-                } catch (ClientException $e) {
-                    continue;
+                if ($cache_file && $this->cached) {
+                    $json = json_decode($cache->read($cache_key), true);
                 }
+                else {
 
-                $json = json_decode($res->getBody(), true);
+                    $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
+                    $req = WP_CLI\Utils\http_request('GET', $url);
+
+                    if ( 20 != substr( $req->status_code, 0, 2 ) ) {
+                      continue;
+                    }
+
+                    $cache->write($cache_key, $req->body);
+                    $json = json_decode($req->body, true);
+
+                }
 
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for plugin %s', $title));
@@ -367,8 +390,6 @@ if (!class_exists('WpSecCheck')) {
             $output = WP_CLI::launch_self('theme list', array(), array('format' => 'json'), false, true);
             $themes = json_decode($output->stdout, true);
 
-            $client = new GuzzleHttp\Client();
-
             switch ($this->outputType) {
                 case self::OUTPUT_JSON:
                     break;
@@ -388,16 +409,26 @@ if (!class_exists('WpSecCheck')) {
                 $title = $theme['name'];
                 $version = $theme['version'];
 
-                $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
+                $cache = WP_CLI::get_cache();
+                $cache_key = "wp-sec/theme-$title.json";
+                $cache_file = $cache->has( $cache_key );
 
-                try {
-                    $res = $client->request('GET', $url);
-                } catch (ClientException $e) {
-                    continue;
+                if ($cache_file && $this->cached) {
+                    $json = json_decode($cache->read($cache_key), true);
                 }
+                else {
 
-                $json = json_decode($res->getBody(), true);
+                    $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
+                    $req = WP_CLI\Utils\http_request('GET', $url);
 
+                    if ( 20 != substr( $req->status_code, 0, 2 ) ) {
+                      continue;
+                    }
+
+                    $cache->write($cache_key, $req->body);
+                    $json = json_decode($req->body, true);
+
+                }
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for theme %s', $title));
                 }
@@ -530,6 +561,11 @@ WP_CLI::add_command(
                 'optional' => true,
                 'default' => 'user',
                 'options' => array('json', 'nagios', 'user'),
+            ),
+            array(
+                'type' => 'flag',
+                'name' => 'cached',
+                'optional' => true,
             ),
         ),
         'when' => 'before_wp_load',
