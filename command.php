@@ -23,7 +23,7 @@ if (!class_exists('WpSecCheck')) {
     class WpSecCheck
     {
         private $outputType = true;
-        private $cached = FALSE;
+        private $cached = false;
 
         private $coreVulnerabilityCount = 0;
         private $coreVulnerabilities = array();
@@ -35,6 +35,8 @@ if (!class_exists('WpSecCheck')) {
         const OUTPUT_USER = 'user';
         const OUTPUT_JSON = 'json';
         const OUTPUT_NAGIOS = 'nagios';
+
+        const TRANSIENT_EXPIRATION = 28800;
 
         /**
          * @param $ags
@@ -429,6 +431,7 @@ if (!class_exists('WpSecCheck')) {
                     $json = json_decode($req->body, true);
 
                 }
+
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for theme %s', $title));
                 }
