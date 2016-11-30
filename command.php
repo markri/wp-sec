@@ -35,6 +35,8 @@ if (!class_exists('WpSecCheck')) {
         const OUTPUT_JSON = 'json';
         const OUTPUT_NAGIOS = 'nagios';
 
+        const TRANSIENT_EXPIRATION = 28800;
+
         /**
          * @param $ags
          * @param $assoc_args
@@ -177,17 +179,23 @@ if (!class_exists('WpSecCheck')) {
 
             // Connect to wpvulndb
             $parameter = intval(str_replace('.', '', $coreVersion));
-
-            $client = new GuzzleHttp\Client();
-            $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
-
-            try {
-                $res = $client->request('GET', $url);
-            } catch (ClientException $e) {
-                WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s', $url));
+            $transient = WP_CLI::launch_self('transient get', array('wp-sec-core'), array(), true, true);
+            if ( empty($transient->stderr) ) {
+                $json = json_decode($transient->stdout, true);
             }
+            else {
+                $client = new GuzzleHttp\Client();
+                $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
 
-            $json = json_decode($res->getBody(), true);
+                try {
+                    $res = $client->request('GET', $url);
+                } catch (ClientException $e) {
+                    WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s', $url));
+                }
+
+                $json = json_decode($res->getBody(), true);
+                WP_CLI::launch_self('transient set', array('wp-sec-core', $res->getBody(), self::TRANSIENT_EXPIRATION));
+            }
 
             if (!array_key_exists($coreVersion, $json)) {
                 WP_CLI::error(sprintf('Version %s not found on wpvulndb', $coreVersion));
@@ -283,13 +291,21 @@ if (!class_exists('WpSecCheck')) {
 
                 $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
 
-                try {
-                    $res = $client->request('GET', $url);
-                } catch (ClientException $e) {
-                    continue;
+                $transientKey = 'wp-sec-plugin-' . $title;
+                $transient = WP_CLI::launch_self('transient get', array($transientKey), array(), true, true);
+                if ( empty($transient->stderr) ) {
+                    $json = json_decode($transient->stdout, true);
                 }
+                else {
+                    try {
+                        $res = $client->request('GET', $url);
+                    } catch (ClientException $e) {
+                        continue;
+                    }
 
-                $json = json_decode($res->getBody(), true);
+                    $json = json_decode($res->getBody(), true);
+                    WP_CLI::launch_self('transient set', array($transientKey, $res->getBody(), self::TRANSIENT_EXPIRATION));
+                }
 
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for plugin %s', $title));
@@ -390,13 +406,22 @@ if (!class_exists('WpSecCheck')) {
 
                 $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
 
-                try {
-                    $res = $client->request('GET', $url);
-                } catch (ClientException $e) {
-                    continue;
+                $transientKey = 'wp-sec-theme-' . $title;
+                $transient = WP_CLI::launch_self('transient get', array($transientKey), array(), true, true);
+                if ( empty($transient->stderr) ) {
+                    $json = json_decode($transient->stdout, true);
                 }
+                else {
 
-                $json = json_decode($res->getBody(), true);
+                    try {
+                        $res = $client->request('GET', $url);
+                    } catch (ClientException $e) {
+                        continue;
+                    }
+
+                    $json = json_decode($res->getBody(), true);
+                    WP_CLI::launch_self('transient set', array($transientKey, $res->getBody(), self::TRANSIENT_EXPIRATION));
+                }
 
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for theme %s', $title));
