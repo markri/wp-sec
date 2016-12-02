@@ -6,13 +6,6 @@
  * @author markri http://github.com/markri
  * @license MIT
  */
- 
-if (!class_exists('GuzzleHttp\Client')) {
-	// For development purposes
-    require __DIR__.'/vendor/autoload.php';
-}
-
-use GuzzleHttp\Exception\ClientException;
 
 if (!class_exists('WP_CLI')) {
     // Whoops, something is wrong
