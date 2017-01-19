@@ -532,7 +532,7 @@ if (!class_exists('WpSecVersion')) {
     {
         public function __invoke()
         {
-            WP_CLI::line('Version: 0.1-beta');
+            WP_CLI::line('Version: 0.0.2');
         }
     }
 }
@@ -541,7 +541,7 @@ WP_CLI::add_command(
     'wp-sec check',
     'WpSecCheck',
     array(
-        'shortdesc' => 'Checks for vulnerabilities at wpvulndb.com',
+        'shortdesc' => 'Checks for vulnerabilities at wpvulndb.com. See wp wp-sec check --help for more details',
         'synopsis' => array(
             array(
                 'type' => 'assoc',
