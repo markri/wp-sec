@@ -4,7 +4,12 @@
     "type": "wp-cli-package",
     "homepage": "https://github.com/markri/wp-sec",
     "license": "MIT",
-    "authors": ["Marco de Krijger"],
+    "authors": [
+        {
+            "name": "Marco de Krijger",
+            "homepage": "http://wp-sec.org"
+        }
+    ],
     "version": "0.0.2",
     "minimum-stability": "dev",
     "autoload": {
