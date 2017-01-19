@@ -185,8 +185,7 @@ if (!class_exists('WpSecCheck')) {
             }
             else {
                 $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
-
-                $req = WP_CLI\Utils\http_request('GET', $url, null, array(), array('verify' => false));
+                $req = WP_CLI\Utils\http_request('GET', $url);
 
                 if ( 20 != substr( $req->status_code, 0, 2 ) ) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
