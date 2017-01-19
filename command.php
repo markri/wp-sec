@@ -17,6 +17,7 @@ if (!class_exists('WpSecCheck')) {
     {
         private $outputType = true;
         private $cached = false;
+        private $cacheTTL = null;
 
         private $coreVulnerabilityCount = 0;
         private $coreVulnerabilities = array();
@@ -28,8 +29,6 @@ if (!class_exists('WpSecCheck')) {
         const OUTPUT_USER = 'user';
         const OUTPUT_JSON = 'json';
         const OUTPUT_NAGIOS = 'nagios';
-
-        const TRANSIENT_EXPIRATION = 28800;
 
         /**
          * @param $ags
@@ -62,6 +61,7 @@ if (!class_exists('WpSecCheck')) {
             $this->outputType = $assoc_args['output'];
 
             $this->cached = isset($assoc_args['cached']);
+            $this->cacheTTL = isset($assoc_args['ttl']) ? $assoc_args['ttl'] : 28800; // default to 8 hours
 
             // Validate wordpress installation
             $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
@@ -124,24 +124,24 @@ if (!class_exists('WpSecCheck')) {
                     $output = array();
 
                     if ($checkCore) {
-                        $output['core'] = [
+                        $output['core'] = array(
                             'count'   => $this->coreVulnerabilityCount,
                             'details' => $this->coreVulnerabilities,
-                        ];
+                        );
                     }
 
                     if ($checkPlugins) {
-                        $output['plugins'] = [
+                        $output['plugins'] = array(
                             'count'   => $this->pluginVulnerabilityCount,
                             'details' => $this->pluginVulnerabilities,
-                        ];
+                        );
                     }
 
                     if ($checkThemes) {
-                        $output['themes'] = [
+                        $output['themes'] = array(
                             'count'   => $this->themeVulnerabilityCount,
                             'details' => $this->themeVulnerabilities,
-                        ];
+                        );
                     }
 
                     WP_CLI::line(json_encode($output));
@@ -177,16 +177,16 @@ if (!class_exists('WpSecCheck')) {
             $parameter = intval(str_replace('.', '', $coreVersion));
 
             $cache = WP_CLI::get_cache();
-            $cache_key = "wp-sec/core.json";
-            $cache_file = $cache->has( $cache_key );
+            $cache_key = sprintf("wp-sec/core-%s.json", $parameter);
+            $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
             if ($cache_file && $this->cached) {
                 $json = json_decode($cache->read($cache_key), true);
             }
             else {
-
                 $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
-                $req = WP_CLI\Utils\http_request('GET', $url);
+
+                $req = WP_CLI\Utils\http_request('GET', $url, null, array(), array('verify' => false));
 
                 if ( 20 != substr( $req->status_code, 0, 2 ) ) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
@@ -289,8 +289,8 @@ if (!class_exists('WpSecCheck')) {
                 $version = $plugin['version'];
 
                 $cache = WP_CLI::get_cache();
-                $cache_key = "wp-sec/plugin-$title.json";
-                $cache_file = $cache->has( $cache_key );
+                $cache_key = sprintf("wp-sec/plugin-%s-%s.json", $title, $version);
+                $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
                     $json = json_decode($cache->read($cache_key), true);
@@ -405,8 +405,8 @@ if (!class_exists('WpSecCheck')) {
                 $version = $theme['version'];
 
                 $cache = WP_CLI::get_cache();
-                $cache_key = "wp-sec/theme-$title.json";
-                $cache_file = $cache->has( $cache_key );
+                $cache_key = sprintf("wp-sec/theme-%s-%s.json", $title, $version);
+                $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
                     $json = json_decode($cache->read($cache_key), true);
@@ -562,6 +562,11 @@ WP_CLI::add_command(
                 'type' => 'flag',
                 'name' => 'cached',
                 'optional' => true,
+            ),
+            array(
+                'type' => 'assoc',
+                'name' => 'ttl',
+                'optional' => true
             ),
         ),
         'when' => 'before_wp_load',

@@ -43,6 +43,13 @@ Following synopsis should be enough to get you started
           Controls the output
           Default: user
 
+      --cached
+          Lets you cache the resuls of wpvulndb, to prevent hammering at their servers. Be nice to them, it's a free service
+
+      --ttl=[integer]
+          Cache control of above --cached setting. If omitted a default of 8 hours is used. This setting will give
+          you fine grained control. Value is entered in seconds
+
     GLOBAL PARAMETERS
 
       All global wp cli parameters are inherited
@@ -89,7 +96,6 @@ Enter your dev environment and create a fresh wordpress installation to test aga
        
 [Install composer](https://getcomposer.org/download/) and run
 
-       php composer.phar install
        mkdir testsite && cd testsite
        wp core download
        wp core config --dbname=database --dbuser=user --dbpass=password --dbhost=wpsec-mysql
