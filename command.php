@@ -268,6 +268,11 @@ if (!class_exists('WpSecCheck')) {
             $output = WP_CLI::launch_self('plugin list', array(), array('format' => 'json'), false, true);
             $plugins = json_decode($output->stdout, true);
 
+            if (null === $plugins) {
+                WP_CLI::error('No plugins found? Try `wp plugin list` to check for errors');
+                return;
+            }
+
             switch ($this->outputType) {
                 case self::OUTPUT_JSON:
                     break;
@@ -383,6 +388,11 @@ if (!class_exists('WpSecCheck')) {
             $this->themeVulnerabilityCount = 0;
             $output = WP_CLI::launch_self('theme list', array(), array('format' => 'json'), false, true);
             $themes = json_decode($output->stdout, true);
+
+            if (null === $themes) {
+                WP_CLI::error('No themes found? Try `wp theme list` to check for errors');
+                return;
+            }
 
             switch ($this->outputType) {
                 case self::OUTPUT_JSON:
