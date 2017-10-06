@@ -57,7 +57,8 @@ if (!class_exists('WpSecCheck')) {
                 default:
                     break;
             }
-
+//var_dump($assoc_args);
+//            exit;
             $this->outputType = $assoc_args['output'];
 
             $this->cached = isset($assoc_args['cached']);
@@ -105,15 +106,16 @@ if (!class_exists('WpSecCheck')) {
                     break;
                 case self::OUTPUT_NAGIOS:
                     if ($this->coreVulnerabilityCount == 0 && $this->pluginVulnerabilityCount == 0 && $this->themeVulnerabilityCount == 0) {
-                        WP_CLI::line('OK - no vulnerabilities found');
+                        WP_CLI::line('OK - no vulnerabilities found | vulns=0');
                         exit(0);
                     } else {
                         WP_CLI::line(
                             sprintf(
-                                'CRITICAL - %s core, %s plugin and %s theme vulnerabilities found',
+                                'CRITICAL - %s core, %s plugin and %s theme vulnerabilities found | vulns=%s',
                                 $this->coreVulnerabilityCount,
                                 $this->pluginVulnerabilityCount,
-                                $this->themeVulnerabilityCount
+                                $this->themeVulnerabilityCount,
+                                $this->coreVulnerabilityCount + $this->pluginVulnerabilityCount + $this->themeVulnerabilityCount
                             )
                         );
                         exit(2);
