@@ -57,8 +57,7 @@ if (!class_exists('WpSecCheck')) {
                 default:
                     break;
             }
-//var_dump($assoc_args);
-//            exit;
+
             $this->outputType = $assoc_args['output'];
 
             $this->cached = isset($assoc_args['cached']);
@@ -93,7 +92,7 @@ if (!class_exists('WpSecCheck')) {
                     } else {
                         WP_CLI::line('-----------------------------------------------');
                         WP_CLI::line('');
-                        WP_CLI::error(
+                        WP_CLI::warning(
                             sprintf(
                                 '%s core, %s plugin and %s theme vulnerabilities found',
                                 $this->coreVulnerabilityCount,
