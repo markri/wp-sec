@@ -50,6 +50,9 @@ Following synopsis should be enough to get you started
           Cache control of above --cached setting. If omitted a default of 8 hours is used. This setting will give
           you fine grained control. Value is entered in seconds
 
+      --lowercase
+          Converts themes and plugin names to lowercase to submit to wpvulndb
+
     GLOBAL PARAMETERS
 
       All global wp cli parameters are inherited
