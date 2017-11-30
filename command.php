@@ -17,6 +17,7 @@ if (!class_exists('WpSecCheck')) {
     {
         private $outputType = true;
         private $cached = false;
+        private $lowercase = false;
         private $cacheTTL = null;
 
         private $coreVulnerabilityCount = 0;
@@ -61,6 +62,7 @@ if (!class_exists('WpSecCheck')) {
             $this->outputType = $assoc_args['output'];
 
             $this->cached = isset($assoc_args['cached']);
+            $this->lowercase = isset($assoc_args['lowercase']);
             $this->cacheTTL = isset($assoc_args['ttl']) ? $assoc_args['ttl'] : 28800; // default to 8 hours
 
             // Validate wordpress installation
@@ -291,6 +293,9 @@ if (!class_exists('WpSecCheck')) {
 
             foreach ($plugins as $plugin) {
                 $title = $plugin['name'];
+                if ($this->lowercase) {
+                    $title = strtolower($title);
+                }
                 $version = $plugin['version'];
 
                 $cache = WP_CLI::get_cache();
@@ -412,6 +417,9 @@ if (!class_exists('WpSecCheck')) {
 
             foreach ($themes as $theme) {
                 $title = $theme['name'];
+                if ($this->lowercase) {
+                    $title = strtolower($title);
+                }
                 $version = $theme['version'];
 
                 $cache = WP_CLI::get_cache();
@@ -576,6 +584,11 @@ WP_CLI::add_command(
             array(
                 'type' => 'assoc',
                 'name' => 'ttl',
+                'optional' => true
+            ),
+            array(
+                'type' => 'flag',
+                'name' => 'lowercase',
                 'optional' => true
             ),
         ),
