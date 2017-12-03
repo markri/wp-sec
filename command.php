@@ -26,6 +26,8 @@ if (!class_exists('WpSecCheck')) {
         private $pluginVulnerabilities = array();
         private $themeVulnerabilityCount = 0;
         private $themeVulnerabilities = array();
+        private $cacheHitCount = 0;
+        private $vulndbRequestCount = 0;
 
         const OUTPUT_USER = 'user';
         const OUTPUT_JSON = 'json';
@@ -147,6 +149,11 @@ if (!class_exists('WpSecCheck')) {
                         );
                     }
 
+                    $output['hits'] = array(
+                        'cache hits'       => $this->cacheHitCount,
+                        'wpvulndb queries' => $this->vulndbRequestCount,
+                    );
+
                     WP_CLI::line(json_encode($output));
 
                     break;
@@ -185,10 +192,12 @@ if (!class_exists('WpSecCheck')) {
 
             if ($cache_file && $this->cached) {
                 $json = json_decode($cache->read($cache_key), true);
+                ++$this->cacheHitCount;
             }
             else {
                 $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
                 $req = WP_CLI\Utils\http_request('GET', $url);
+                ++$this->vulndbRequestCount;
 
                 if ( 20 != substr( $req->status_code, 0, 2 ) ) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
@@ -304,11 +313,13 @@ if (!class_exists('WpSecCheck')) {
 
                 if ($cache_file && $this->cached) {
                     $json = json_decode($cache->read($cache_key), true);
+                    ++$this->cacheHitCount;
                 }
                 else {
 
                     $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
                     $req = WP_CLI\Utils\http_request('GET', $url);
+                    ++$this->vulndbRequestCount;
 
                     if ( 20 != substr( $req->status_code, 0, 2 ) ) {
                       continue;
@@ -428,11 +439,13 @@ if (!class_exists('WpSecCheck')) {
 
                 if ($cache_file && $this->cached) {
                     $json = json_decode($cache->read($cache_key), true);
+                    ++$this->cacheHitCount;
                 }
                 else {
 
                     $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
                     $req = WP_CLI\Utils\http_request('GET', $url);
+                    ++$this->vulndbRequestCount;
 
                     if ( 20 != substr( $req->status_code, 0, 2 ) ) {
                       continue;
