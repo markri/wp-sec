@@ -13,7 +13,8 @@ services:
 branches:
   only:
     - master
-    - develop
+    - apiv2
+    - apiv3
 
 php:
   - 5.6
