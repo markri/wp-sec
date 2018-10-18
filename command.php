@@ -13,12 +13,23 @@ if (!class_exists('WP_CLI')) {
 }
 
 if (!class_exists('WpSecCheck')) {
+
     class WpSecCheck
     {
+        const OUTPUT_USER = 'user';
+        const OUTPUT_JSON = 'json';
+        const OUTPUT_NAGIOS = 'nagios';
+
+        const API_V2 = 'v2';
+        const API_V3 = 'v3';
+
         private $outputType = true;
-        private $cached = false;
-        private $lowercase = false;
-        private $cacheTTL = null;
+        private $cached = false;    // No caching as default. Don't exceed 30 calls for every 30 seconds
+        private $lowercase = false; // wpvulndb had some issues a while ago, where names seemed to be case insensitive see:
+                                    // https://github.com/markri/wp-sec/issues/14
+        private $cacheTTL = 28800;  // default to 8 hours
+        private $APIversion = self::API_V2;    // Defaults to 2 for easy usage, use 3 for new API
+        private $token = null;      // Token to use for API v3
 
         private $coreVulnerabilityCount = 0;
         private $coreVulnerabilities = array();
@@ -29,9 +40,6 @@ if (!class_exists('WpSecCheck')) {
         private $cacheHitCount = 0;
         private $vulndbRequestCount = 0;
 
-        const OUTPUT_USER = 'user';
-        const OUTPUT_JSON = 'json';
-        const OUTPUT_NAGIOS = 'nagios';
 
         /**
          * @param $ags
@@ -64,8 +72,11 @@ if (!class_exists('WpSecCheck')) {
             $this->outputType = $assoc_args['output'];
 
             $this->cached = isset($assoc_args['cached']);
+
             $this->lowercase = isset($assoc_args['lowercase']);
-            $this->cacheTTL = isset($assoc_args['ttl']) ? $assoc_args['ttl'] : 28800; // default to 8 hours
+            $this->cacheTTL = isset($assoc_args['ttl']) ? $assoc_args['ttl'] : $this->cacheTTL;
+            $this->APIversion = isset($assoc_args['api']) ? $assoc_args['api'] : $this->APIversion;
+            $this->token = isset($assoc_args['token']) ? $assoc_args['token'] : $this->token;
 
             // Validate wordpress installation
             $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
@@ -195,11 +206,17 @@ if (!class_exists('WpSecCheck')) {
                 ++$this->cacheHitCount;
             }
             else {
-                $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
-                $req = WP_CLI\Utils\http_request('GET', $url);
+                if ($this->APIversion == self::API_V2) {
+                    $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
+                    $req = WP_CLI\Utils\http_request('GET', $url);
+                } else {
+                    $url = sprintf('https://wpvulndb.com/api/v3/wordpresses/%s', $parameter);
+                    $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
+                }
+
                 ++$this->vulndbRequestCount;
 
-                if ( 20 != substr( $req->status_code, 0, 2 ) ) {
+                if ( '20' != substr( $req->status_code, 0, 2 ) ) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                 }
 
@@ -317,13 +334,23 @@ if (!class_exists('WpSecCheck')) {
                 }
                 else {
 
-                    $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
-                    $req = WP_CLI\Utils\http_request('GET', $url);
+                    if ($this->APIversion == self::API_V2) {
+                        $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
+                        $req = WP_CLI\Utils\http_request('GET', $url);
+                    } else {
+                        $url = sprintf('https://wpvulndb.com/api/v3/plugins/%s', $title);
+                        $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
+                    }
+
                     ++$this->vulndbRequestCount;
 
-                    if ( 20 != substr( $req->status_code, 0, 2 ) ) {
-                      continue;
+                    if ( $req->status_code  == '404') {
+                        // For plugins we continue, because not every plugin has a vulnerability and therfore no entry at wpvulndb.com
+                        continue;
+                    } else if('20' != substr( $req->status_code, 0, 2 )) {
+                        WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                     }
+
 
                     $cache->write($cache_key, $req->body);
                     $json = json_decode($req->body, true);
@@ -443,12 +470,21 @@ if (!class_exists('WpSecCheck')) {
                 }
                 else {
 
-                    $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
-                    $req = WP_CLI\Utils\http_request('GET', $url);
+                    if ($this->APIversion == self::API_V2) {
+                        $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
+                        $req = WP_CLI\Utils\http_request('GET', $url);
+                    } else {
+                        $url = sprintf('https://wpvulndb.com/api/v3/themes/%s', $title);
+                        $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
+                    }
+
                     ++$this->vulndbRequestCount;
 
-                    if ( 20 != substr( $req->status_code, 0, 2 ) ) {
-                      continue;
+                    if ( $req->status_code  == '404') {
+                        // For plugins we continue, because not every theme has a vulnerability and therfore no entry at wpvulndb.com
+                        continue;
+                    } else if('20' != substr( $req->status_code, 0, 2 )) {
+                        WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                     }
 
                     $cache->write($cache_key, $req->body);
@@ -564,7 +600,7 @@ if (!class_exists('WpSecVersion')) {
     {
         public function __invoke()
         {
-            WP_CLI::line('Version: 0.0.2');
+            WP_CLI::line('Version: 1.0.0');
         }
     }
 }
@@ -602,6 +638,16 @@ WP_CLI::add_command(
             array(
                 'type' => 'flag',
                 'name' => 'lowercase',
+                'optional' => true
+            ),
+            array(
+                'type' => 'assoc',
+                'name' => 'api',
+                'optional' => true
+            ),
+            array(
+                'type' => 'assoc',
+                'name' => 'token',
                 'optional' => true
             ),
         ),
