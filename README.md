@@ -96,18 +96,20 @@ Create a docker environment and bring it up like this:
 Enter your dev environment and create a fresh wordpress installation to test against
 
        docker exec -ti wpsec-phpcli /bin/bash
-       
-[Install composer](https://getcomposer.org/download/) and run
-
        mkdir testsite && cd testsite
        wp core download
-       wp core config --dbname=database --dbuser=user --dbpass=password --dbhost=wpsec-mysql
+       wp core config --dbname=wpsec --dbuser=wpsec --dbpass=wpsec --dbhost=wpsec-mariadb
        wp core install --url=http://localhost --title=testsite --admin_user=admin --admin_password=admin --admin_email=mail@mail.com --skip-email
        
-Running
+Running (from /home/wp/testsite)
 
        wp wp-sec check
        
+Preparing testsuite (from /home/wp)
+
+       composer install
+       mysql -h wpsec-mariadb -e 'CREATE DATABASE IF NOT EXISTS wp_cli_test;' -uroot -pwpsec
+
 Running testsuite
        
        vendor/bin/behat --strict

@@ -1,33 +1,28 @@
-version: '2'
+version: "3"
+
+volumes:
+    mariadb:
 
 services:
 
-  data:
-    container_name: wpsec-data
-    build: docker/images/data
-    volumes:
-        - ./:/home/wp:rw
-
-  mysql:
-    container_name: wpsec-mysql
-    build: docker/images/mariadb
-    ports:
-      - 3306:3306
-    environment:
-        MYSQL_ROOT_PASSWORD: password
-        MYSQL_USER: user
-        MYSQL_PASSWORD: password
-        MYSQL_DATABASE: database
-    volumes:
-      - ./docker/images/mariadb/resources/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./docker/data/mariadb:/var/lib/mysql
-      - ./docker/log/mysql:/var/log/mysql
+  mariadb:
+      image: mariadb:10.3
+      container_name: wpsec-mariadb
+      ports:
+        - 3306:3306
+      environment:
+          MYSQL_ROOT_PASSWORD: wpsec
+          MYSQL_USER: wpsec
+          MYSQL_PASSWORD: wpsec
+          MYSQL_DATABASE: wpsec
+      volumes:
+          - mariadb:/var/lib/mysql
 
   php-cli:
-    container_name: wpsec-phpcli
-    build: docker/images/php-cli-5.6
-    volumes:
-      - ./docker/images/php-cli-5.6/resources/php.ini:/usr/local/etc/php/php.ini:ro
-    volumes_from:
-      - data
-    tty: true
+     container_name: wpsec-phpcli
+     build: docker/images/php-cli
+     volumes:
+        - './:/home/wp:rw'
+        - './docker/images/php-cli/resources/php.ini:/usr/local/etc/php/php.ini:ro'
+     links:
+        - mariadb

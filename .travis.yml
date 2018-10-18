@@ -7,6 +7,9 @@ notifications:
     on_success: never
     on_failure: change
 
+services:
+  - mysql
+
 branches:
   only:
     - master
@@ -16,6 +19,7 @@ php:
   - 5.6
   - 7.0
   - 7.1
+  - 7.2
 
 cache:
   - composer
