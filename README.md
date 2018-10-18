@@ -50,8 +50,14 @@ Following synopsis should be enough to get you started
           Cache control of above --cached setting. If omitted a default of 8 hours is used. This setting will give
           you fine grained control. Value is entered in seconds
 
+      --api=[v2|v3]
+          The WPvulnDB API version to be used. Currently there is no functional difference between these API's. Except for logging in with a token on API v3
+
+      --token=[<your token>] 
+          Your user token to be used @ wpvulndb.com. Only needed for API v3
+
       --lowercase
-          Converts themes and plugin names to lowercase to submit to wpvulndb
+          Converts themes and plugin names to lowercase to submit to wpvulndb. This is due to an issue at wpvulndb. https://github.com/markri/wp-sec/issues/14 As of october 2018 (tested) it doesn't seem to be needed anymore
  
     GLOBAL PARAMETERS
 
