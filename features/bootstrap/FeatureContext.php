@@ -170,8 +170,8 @@ class FeatureContext extends BehatContext implements ClosuredContextInterface {
 			self::$db_settings = array(
 				'dbname' => 'wp_cli_test',
 				'dbuser' => 'root',
-				'dbpass' => 'password',
-				'dbhost' => 'wpsec-mysql',
+				'dbpass' => 'wpsec',
+				'dbhost' => 'wpsec-mariadb',
 				);
 		}
 
