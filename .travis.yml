@@ -13,7 +13,7 @@ services:
 branches:
   only:
     - master
-    - /^dev-.*$/
+    - develop
 
 php:
   - 5.6
