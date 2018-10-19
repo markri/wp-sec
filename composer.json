@@ -10,8 +10,8 @@
             "homepage": "http://wp-sec.org"
         }
     ],
-    "version": "0.0.3",
-    "minimum-stability": "dev",
+    "version": "1.0.0",
+    "minimum-stability": "stable",
     "autoload": {
         "files": [ "command.php" ]
     },
