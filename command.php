@@ -216,7 +216,7 @@ if (!class_exists('WpSecCheck')) {
 
                 ++$this->vulndbRequestCount;
 
-                $cache->write($cache_key, serialize($req->body));
+                $cache->write($cache_key, serialize($req));
             }
 
             $json = json_decode($req->body, true);
@@ -344,7 +344,7 @@ if (!class_exists('WpSecCheck')) {
 
                     ++$this->vulndbRequestCount;
 
-                    $cache->write($cache_key, serialize($req->body));
+                    $cache->write($cache_key, serialize($req));
                 }
 
                 $json = json_decode($req->body, true);
@@ -479,7 +479,7 @@ if (!class_exists('WpSecCheck')) {
 
                     ++$this->vulndbRequestCount;
 
-                    $cache->write($cache_key, serialize($req->body));
+                    $cache->write($cache_key, serialize($req));
                 }
 
                 $json = json_decode($req->body, true);
