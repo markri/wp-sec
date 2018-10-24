@@ -202,7 +202,7 @@ if (!class_exists('WpSecCheck')) {
             $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
             if ($cache_file && $this->cached) {
-                $json = json_decode($cache->read($cache_key), true);
+                $req = unserialize($cache->read($cache_key));
                 ++$this->cacheHitCount;
             }
             else {
@@ -216,12 +216,13 @@ if (!class_exists('WpSecCheck')) {
 
                 ++$this->vulndbRequestCount;
 
-                $cache->write($cache_key, $req->body);
-                $json = json_decode($req->body, true);
+                $cache->write($cache_key, serialize($req->body));
+            }
 
-                if ( '20' != substr( $req->status_code, 0, 2 ) ) {
-                    WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
-                }
+            $json = json_decode($req->body, true);
+
+            if ( '20' != substr( $req->status_code, 0, 2 ) ) {
+                WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
             }
 
             if (!array_key_exists($coreVersion, $json)) {
@@ -328,7 +329,7 @@ if (!class_exists('WpSecCheck')) {
                 $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
-                    $json = json_decode($cache->read($cache_key), true);
+                    $req = unserialize($cache->read($cache_key));
                     ++$this->cacheHitCount;
                 }
                 else {
@@ -343,15 +344,16 @@ if (!class_exists('WpSecCheck')) {
 
                     ++$this->vulndbRequestCount;
 
-                    $cache->write($cache_key, $req->body);
-                    $json = json_decode($req->body, true);
+                    $cache->write($cache_key, serialize($req->body));
+                }
 
-                    if ( $req->status_code  == '404') {
-                        // For plugins we continue, because not every plugin has a vulnerability and therfore no entry at wpvulndb.com
-                        continue;
-                    } else if('20' != substr( $req->status_code, 0, 2 )) {
-                        WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
-                    }
+                $json = json_decode($req->body, true);
+
+                if ( $req->status_code  == '404') {
+                    // For plugins we continue, because not every plugin has a vulnerability and therfore no entry at wpvulndb.com
+                    continue;
+                } else if('20' != substr( $req->status_code, 0, 2 )) {
+                    WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                 }
 
                 if (!array_key_exists($title, $json)) {
@@ -462,7 +464,7 @@ if (!class_exists('WpSecCheck')) {
                 $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
-                    $json = json_decode($cache->read($cache_key), true);
+                    $req = unserialize($cache->read($cache_key));
                     ++$this->cacheHitCount;
                 }
                 else {
@@ -477,16 +479,18 @@ if (!class_exists('WpSecCheck')) {
 
                     ++$this->vulndbRequestCount;
 
-                    $cache->write($cache_key, $req->body);
-                    $json = json_decode($req->body, true);
-
-                    if ( $req->status_code  == '404') {
-                        // For plugins we continue, because not every theme has a vulnerability and therfore no entry at wpvulndb.com
-                        continue;
-                    } else if('20' != substr( $req->status_code, 0, 2 )) {
-                        WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
-                    }
+                    $cache->write($cache_key, serialize($req->body));
                 }
+
+                $json = json_decode($req->body, true);
+
+                if ( $req->status_code  == '404') {
+                    // For plugins we continue, because not every theme has a vulnerability and therfore no entry at wpvulndb.com
+                    continue;
+                } else if('20' != substr( $req->status_code, 0, 2 )) {
+                    WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
+                }
+
 
                 if (!array_key_exists($title, $json)) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for theme %s', $title));
