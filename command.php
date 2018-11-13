@@ -319,6 +319,12 @@ if (!class_exists('WpSecCheck')) {
 
             foreach ($plugins as $plugin) {
                 $title = $plugin['name'];
+
+                if (in_array($plugin['status'], array('must-use','dropin'), true )) {
+                    // these types of plugins cannot be checked on wpvulndb
+                    continue;
+                }
+
                 if ($this->lowercase) {
                     $title = strtolower($title);
                 }
