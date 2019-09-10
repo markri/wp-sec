@@ -179,8 +179,11 @@ if (!class_exists('WpSecCheck')) {
          */
         private function checkCoreVulnerability()
         {
-            // Get version throug internal WP_CLI command
-            $output = WP_CLI::launch_self('core version', array(), array(), false, true);
+            // Get version through internal WP_CLI command
+            $output = WP_CLI::runcommand('core version', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $coreVersion = trim($output->stdout);
 
             switch ($this->outputType) {
@@ -297,7 +300,10 @@ if (!class_exists('WpSecCheck')) {
         private function checkPluginVulnerabilities()
         {
             $this->pluginVulnerabilityCount = 0;
-            $output = WP_CLI::launch_self('plugin list', array(), array('format' => 'json'), false, true);
+            $output = WP_CLI::runcommand('plugin list --format=json', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $plugins = json_decode($output->stdout, true);
 
             if (null === $plugins) {
@@ -438,7 +444,10 @@ if (!class_exists('WpSecCheck')) {
         private function checkThemeVulnerabilities()
         {
             $this->themeVulnerabilityCount = 0;
-            $output = WP_CLI::launch_self('theme list', array(), array('format' => 'json'), false, true);
+            $output = WP_CLI::runcommand('theme list --format=json', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $themes = json_decode($output->stdout, true);
 
             if (null === $themes) {
