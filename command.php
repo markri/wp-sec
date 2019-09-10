@@ -79,7 +79,10 @@ if (!class_exists('WpSecCheck')) {
             $this->token = isset($assoc_args['token']) ? $assoc_args['token'] : $this->token;
 
             // Validate wordpress installation
-            $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
+            $output = WP_CLI::runcommand('core is-installed', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             if ($output->return_code == 1) {
                 WP_CLI::error('No wordpress installation found');
             }
