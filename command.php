@@ -25,8 +25,6 @@ if (!class_exists('WpSecCheck')) {
 
         private $outputType = true;
         private $cached = false;    // No caching as default. Don't exceed 30 calls for every 30 seconds
-        private $lowercase = false; // wpvulndb had some issues a while ago, where names seemed to be case insensitive see:
-                                    // https://github.com/markri/wp-sec/issues/14
         private $cacheTTL = 28800;  // default to 8 hours
         private $APIversion = self::API_V2;    // Defaults to 2 for easy usage, use 3 for new API
         private $token = null;      // Token to use for API v3
@@ -73,13 +71,15 @@ if (!class_exists('WpSecCheck')) {
 
             $this->cached = isset($assoc_args['cached']);
 
-            $this->lowercase = isset($assoc_args['lowercase']);
             $this->cacheTTL = isset($assoc_args['ttl']) ? $assoc_args['ttl'] : $this->cacheTTL;
             $this->APIversion = isset($assoc_args['api']) ? $assoc_args['api'] : $this->APIversion;
             $this->token = isset($assoc_args['token']) ? $assoc_args['token'] : $this->token;
 
             // Validate wordpress installation
-            $output = WP_CLI::launch_self('core is-installed', array(), array(), false, true);
+            $output = WP_CLI::runcommand('core is-installed', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             if ($output->return_code == 1) {
                 WP_CLI::error('No wordpress installation found');
             }
@@ -176,8 +176,11 @@ if (!class_exists('WpSecCheck')) {
          */
         private function checkCoreVulnerability()
         {
-            // Get version throug internal WP_CLI command
-            $output = WP_CLI::launch_self('core version', array(), array(), false, true);
+            // Get version through internal WP_CLI command
+            $output = WP_CLI::runcommand('core version', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $coreVersion = trim($output->stdout);
 
             switch ($this->outputType) {
@@ -294,7 +297,10 @@ if (!class_exists('WpSecCheck')) {
         private function checkPluginVulnerabilities()
         {
             $this->pluginVulnerabilityCount = 0;
-            $output = WP_CLI::launch_self('plugin list', array(), array('format' => 'json'), false, true);
+            $output = WP_CLI::runcommand('plugin list --format=json', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $plugins = json_decode($output->stdout, true);
 
             if (null === $plugins) {
@@ -325,9 +331,6 @@ if (!class_exists('WpSecCheck')) {
                     continue;
                 }
 
-                if ($this->lowercase) {
-                    $title = strtolower($title);
-                }
                 $version = $plugin['version'];
 
                 $cache = WP_CLI::get_cache();
@@ -362,11 +365,19 @@ if (!class_exists('WpSecCheck')) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                 }
 
-                if (!array_key_exists($title, $json)) {
+                $json_entry = NULL;
+                foreach ($json as $entry_title => $entry) {
+                    if (strtolower($title) == strtolower($entry_title)) {
+                        $json_entry = $entry;
+                        break;
+                    }
+                }
+                if ($json_entry === NULL) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for plugin %s', $title));
                 }
 
-                $vulnerabilities = $json[$title]['vulnerabilities'];
+                $vulnerabilities = $json_entry['vulnerabilities'];
+
                 $pluginVulnerabilities = array(
                     'title'   => $title,
                     'version' => $version,
@@ -435,7 +446,10 @@ if (!class_exists('WpSecCheck')) {
         private function checkThemeVulnerabilities()
         {
             $this->themeVulnerabilityCount = 0;
-            $output = WP_CLI::launch_self('theme list', array(), array('format' => 'json'), false, true);
+            $output = WP_CLI::runcommand('theme list --format=json', array(
+              'return' => 'all',
+              'exit_error' => false,
+            ));
             $themes = json_decode($output->stdout, true);
 
             if (null === $themes) {
@@ -460,9 +474,6 @@ if (!class_exists('WpSecCheck')) {
 
             foreach ($themes as $theme) {
                 $title = $theme['name'];
-                if ($this->lowercase) {
-                    $title = strtolower($title);
-                }
                 $version = $theme['version'];
 
                 $cache = WP_CLI::get_cache();
@@ -497,12 +508,19 @@ if (!class_exists('WpSecCheck')) {
                     WP_CLI::error(sprintf('Couldn\'t check wpvulndb @ %s (HTTP code %s)', $url, $req->status_code));
                 }
 
-
-                if (!array_key_exists($title, $json)) {
+                $json_entry = NULL;
+                foreach ($json as $entry_title => $entry) {
+                    if (strtolower($title) == strtolower($entry_title)) {
+                        $json_entry = $entry;
+                        break;
+                    }
+                }
+                if ($json_entry === NULL) {
                     WP_CLI::error(sprintf('Unexpected response from wpvulndb for theme %s', $title));
                 }
 
-                $vulnerabilities = $json[$title]['vulnerabilities'];
+                $vulnerabilities = $json_entry['vulnerabilities'];
+
                 $themeVulnerabilities = array(
                     'title'   => $title,
                     'version' => $version,
@@ -639,11 +657,6 @@ WP_CLI::add_command(
             array(
                 'type' => 'assoc',
                 'name' => 'ttl',
-                'optional' => true
-            ),
-            array(
-                'type' => 'flag',
-                'name' => 'lowercase',
                 'optional' => true
             ),
             array(
