@@ -20,13 +20,12 @@ if (!class_exists('WpSecCheck')) {
         const OUTPUT_JSON = 'json';
         const OUTPUT_NAGIOS = 'nagios';
 
-        const API_V2 = 'v2';
         const API_V3 = 'v3';
 
         private $outputType = true;
         private $cached = false;    // No caching as default. Don't exceed 30 calls for every 30 seconds
         private $cacheTTL = 28800;  // default to 8 hours
-        private $APIversion = self::API_V2;    // Defaults to 2 for easy usage, use 3 for new API
+        private $APIversion = self::API_V3;    // Defaults to 3 now
         private $token = null;      // Token to use for API v3
 
         private $coreVulnerabilityCount = 0;
@@ -82,6 +81,10 @@ if (!class_exists('WpSecCheck')) {
             ));
             if ($output->return_code == 1) {
                 WP_CLI::error('No wordpress installation found');
+            }
+
+            if (empty($this->token)) {
+                WP_CLI::error('Token is required, register one at https://wpvulndb.com/users/sign_up');
             }
 
             // Execute
@@ -209,13 +212,8 @@ if (!class_exists('WpSecCheck')) {
                 ++$this->cacheHitCount;
             }
             else {
-                if ($this->APIversion == self::API_V2) {
-                    $url = sprintf('https://wpvulndb.com/api/v2/wordpresses/%s', $parameter);
-                    $req = WP_CLI\Utils\http_request('GET', $url);
-                } else {
-                    $url = sprintf('https://wpvulndb.com/api/v3/wordpresses/%s', $parameter);
-                    $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
-                }
+                $url = sprintf('https://wpvulndb.com/api/v3/wordpresses/%s', $parameter);
+                $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
 
                 ++$this->vulndbRequestCount;
 
@@ -342,15 +340,8 @@ if (!class_exists('WpSecCheck')) {
                     ++$this->cacheHitCount;
                 }
                 else {
-
-                    if ($this->APIversion == self::API_V2) {
-                        $url = sprintf('https://wpvulndb.com/api/v2/plugins/%s', $title);
-                        $req = WP_CLI\Utils\http_request('GET', $url);
-                    } else {
-                        $url = sprintf('https://wpvulndb.com/api/v3/plugins/%s', $title);
-                        $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
-                    }
-
+                    $url = sprintf('https://wpvulndb.com/api/v3/plugins/%s', $title);
+                    $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
                     ++$this->vulndbRequestCount;
 
                     $cache->write($cache_key, serialize($req));
@@ -485,14 +476,8 @@ if (!class_exists('WpSecCheck')) {
                     ++$this->cacheHitCount;
                 }
                 else {
-
-                    if ($this->APIversion == self::API_V2) {
-                        $url = sprintf('https://wpvulndb.com/api/v2/themes/%s', $title);
-                        $req = WP_CLI\Utils\http_request('GET', $url);
-                    } else {
-                        $url = sprintf('https://wpvulndb.com/api/v3/themes/%s', $title);
-                        $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
-                    }
+                    $url = sprintf('https://wpvulndb.com/api/v3/themes/%s', $title);
+                    $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
 
                     ++$this->vulndbRequestCount;
 

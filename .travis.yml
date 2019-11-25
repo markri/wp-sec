@@ -20,6 +20,7 @@ php:
   - 7.0
   - 7.1
   - 7.2
+  - 7.3
 
 cache:
   - composer
@@ -27,7 +28,8 @@ cache:
 
 env:
   global:
-    - WP_CLI_BIN_DIR=/tmp/wp-cli-phar
+  - WP_CLI_BIN_DIR=/tmp/wp-cli-phar
+  - secure: Ig/ihYmroT/dDznGrSfz+DEPQlADiBqv5o9oblZoZ4kv7pyeILywuqvgKd/dVONnmBDvsQMriQ3vQT3q7A7/kkUzokV2GtnwC0omifSbIh/igbMw6I5t+KW1UQDPmtuh4x46G3O2HeSe3/MkbXQaNEh9sUl4AiM/XssvVgwoidoT+JvDP7uB6YVcmkoARPYPm/KsNlliM0SB02cchzKWC5UvDl5q5e6h6YC69gzpRKfz7aZUsec3HwS07Uwc+f8xRhaBg/3/fjk0lMWjg6U9YMQDkWWATppbK6bWFDGB/h8R+hzl7R+qo4Ams+HI/HqCVbjnXb/G3GAXHhYb+4JSVxYa3ZqcUEAbkmYqcf1kkvm1zoFJYo9PLlT7yNoMiYyrpMYiFsMR7HW3v6NgQPmb3p8zNuI5BNEuTfJt958KAFLXOgWrnJvK1oNzy/aLie+MrPRHizGQe6IgLkl2ucj/9JaB8jM3V4rtGbb3wlRshQyCIYhIyzIM73TWM/8IsWlByDd8DJQplvXZur3jElka19j1cfbfTYIE2RimYPU30w26XepdkbP1wEnGPNJSI9fgEf9PSKwf6WZPXO9U7tYt6xQ0SpjeUGdqBp9SVFVTh44x/yzEQQCQUoHn6XJvQ/FDm97ICcZ9Odp/Q9NeXV2Ek+f8+KsqCS6t+sFGOe0ZoLA=
 
 before_script:
   - bash bin/install-package-tests.sh
