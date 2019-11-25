@@ -90,35 +90,35 @@ the docker environment.
 Place wp-cli binary in the bin folder. According to current documentation from WP-CLI you would want to do something 
 like: 
        
-       cd bin 
-       curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
-       chmod +x wp-cli.phar
-       mv wp-cli.phar wp
+    cd bin 
+    curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+    chmod +x wp-cli.phar
+    mv wp-cli.phar wp
        
 Create a docker environment and bring it up like this:
    
-       docker-compose up -d
+    docker-compose up -d
        
 Enter your dev environment and create a fresh wordpress installation to test against
 
-       docker exec -ti wpsec-phpcli /bin/bash
-       mkdir testsite && cd testsite
-       wp core download
-       wp core config --dbname=wpsec --dbuser=wpsec --dbpass=wpsec --dbhost=wpsec-mariadb
-       wp core install --url=http://localhost --title=testsite --admin_user=admin --admin_password=admin --admin_email=mail@mail.com --skip-email
+    docker exec -ti wpsec-phpcli /bin/bash
+    mkdir testsite && cd testsite
+    wp core download
+    wp core config --dbname=wpsec --dbuser=wpsec --dbpass=wpsec --dbhost=wpsec-mariadb
+    wp core install --url=http://localhost --title=testsite --admin_user=admin --admin_password=admin --admin_email=mail@mail.com --skip-email
        
 Running (from /home/wp/testsite)
 
-       wp wp-sec check
+    wp wp-sec check
        
 Preparing testsuite (from /home/wp)
 
-       composer install
-       mysql -h wpsec-mariadb -e 'CREATE DATABASE IF NOT EXISTS wp_cli_test;' -uroot -pwpsec
+    composer install
+    mysql -h wpsec-mariadb -e 'CREATE DATABASE IF NOT EXISTS wp_cli_test;' -uroot -pwpsec
 
 Running testsuite
        
-       vendor/bin/behat --strict
+    vendor/bin/behat --strict
           
 
 ### Reporting a bug
