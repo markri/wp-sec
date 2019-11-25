@@ -3,6 +3,7 @@ markri/wp-sec
 
 
 [![Build Status](https://travis-ci.org/markri/wp-sec.svg?branch=master)](https://travis-ci.org/markri/wp-sec)
+Note that build status might be "red" due to the API limit of wpvulndb
 
 Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contributing)
 
