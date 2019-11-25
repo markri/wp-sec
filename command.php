@@ -206,14 +206,16 @@ if (!class_exists('WpSecCheck')) {
             $cache = WP_CLI::get_cache();
             $cache_key = sprintf("wp-sec/core-%s.json", $parameter);
             $cache_file = $cache->has( $cache_key, $this->cacheTTL );
-            $url = sprintf('https://wpvulndb.com/api/v3/wordpresses/%s', $parameter);
 
             if ($cache_file && $this->cached) {
+                $url = 'Cache';
                 $req = unserialize($cache->read($cache_key));
                 ++$this->cacheHitCount;
             }
             else {
+                $url = sprintf('https://wpvulndb.com/api/v3/wordpresses/%s', $parameter);
                 $req = WP_CLI\Utils\http_request('GET', $url, null, array('Authorization' => sprintf('Token token=%s', $this->token)));
+
                 ++$this->vulndbRequestCount;
 
                 $cache->write($cache_key, serialize($req));
@@ -335,6 +337,7 @@ if (!class_exists('WpSecCheck')) {
                 $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
+                    $url = 'Cache';
                     $req = unserialize($cache->read($cache_key));
                     ++$this->cacheHitCount;
                 }
@@ -471,6 +474,7 @@ if (!class_exists('WpSecCheck')) {
                 $cache_file = $cache->has( $cache_key, $this->cacheTTL );
 
                 if ($cache_file && $this->cached) {
+                    $url = 'Cache';
                     $req = unserialize($cache->read($cache_key));
                     ++$this->cacheHitCount;
                 }
