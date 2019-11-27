@@ -71,7 +71,7 @@ Following synopsis should be enough to get you started
 Installing this package requires WP-CLI v0.23.0 or greater. Install fresh wp-cli as instructed [here](http://wp-cli.org/#installing)
 Or update to the latest stable release with `wp cli update`.
 
-Once you've done so, you can install this package with `wp package install markri/wp-sec`.
+Unfortunately the wp-cli satis repository isn't much updated anymore. So the easiest way to install the wp-sec package is to download the latest zipball from [here](https://github.com/markri/wp-sec/releases) and install it locally with `wp package install <version>.zip`.
 
 
 ## Contributing
