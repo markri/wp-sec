@@ -10,7 +10,7 @@
             "homepage": "http://wp-sec.org"
         }
     ],
-    "version": "1.0.4",
+    "version": "1.0.5",
     "minimum-stability": "stable",
     "autoload": {
         "files": [ "command.php" ]
