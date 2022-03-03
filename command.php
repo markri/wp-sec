@@ -581,6 +581,10 @@ if (!class_exists('WpSecCheck')) {
          */
         private function isVersionLessThan($versionToCheck, $minimumVersion)
         {
+            if ($minimumVersion == NULL) {
+              return true;
+            }
+
             $toCheckParts = explode('.', trim($versionToCheck));
             $minimumParts = explode('.', trim($minimumVersion));
 
